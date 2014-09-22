@@ -1,0 +1,26 @@
+#!/bin/csh
+
+setenv NM `echo $1 | awk '{print 1440*$1}'`
+
+echo NM $NM
+
+tail -$NM  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,0.514*$7}' >&! /usr/local/livedata/tmp/wind_nd.dat
+
+
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+
+set xlabel "Time [UT]"
+set ylabel "Wind [kn]"
+set yrange [0.0:20.0]
+set title "Wind: last $1 days"
+set format x "%b-%d-%H"
+set xtics rotate by 90 offset 0,-4 out nomirror
+unset key
+set term png small
+set output "/var/www/html/Ops/wind_nd.png"
+plot "/usr/local/livedata/tmp/wind_nd.dat" using 1:2 wi li, 0.0 wi li
+
+EOF

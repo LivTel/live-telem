@@ -1,0 +1,44 @@
+#!/bin/csh
+
+set file = `echo $1 | tr '[A-Z]' '[a-z]'`.d1
+set out = /usr/local/livedata/tmp/$file
+
+set app = /home/eng/public_html/$2
+
+/usr/bin/wget -O $out  http://150.204.240.8/data/webfiles/$file
+
+set STAT = $status
+
+if ($STAT == 0) then
+
+    # is it same as last one we got ?
+
+    echo Compare $out with ${out}.done >>& /usr/local/livedata/tmp/grab.log
+
+    set dd = `/usr/bin/diff $out ${out}.done`
+
+    set DSTAT = $status
+
+    if ($DSTAT == 0) then
+
+	# they are the same, so no process
+
+	echo Files are the same, no processing >>& /usr/local/livedata/tmp/grab.log
+
+    else
+
+	# process
+
+	echo  will be appending $out to $app  >>& /usr/local/livedata/tmp/grab.log
+	/bin/cat $out >> $app
+
+	/bin/mv -f $out ${out}.done
+
+    endif
+
+else
+
+    # no process
+  #  echo Dodgy data
+
+endif

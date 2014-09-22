@@ -1,0 +1,13 @@
+#!/usr/bin/gnuplot 
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S" 
+set xlabel "Date/Time [UT]" 
+set ylabel "Frodo Environment" 
+set yrange [0.0:30.0] 
+set title "Frodo Environment Temperature: last week 17k entries" 
+set format x "%d/%H:%M" 
+set key right bottom 
+set term png small
+set output "/var/www/html/Ops/frodo_env_17.png" 
+plot "/usr/local/livedata/tmp/frodo_env_17.dat" using 1:2 wi li lc rgb "red" ti "Red",\
+ "/usr/local/livedata/tmp/frodo_env_wk.dat" using 1:3 wi li lc rgb "blue" ti "Blue"

@@ -1,0 +1,18 @@
+#!/bin/csh                                                                                                                                
+tail -5760  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$7}' >&! /usr/local/livedata/tmp/wind_96h.dat
+
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S
+set xlabel "Time [UT]"
+set ylabel "Wind"
+set yrange [0.0:40.0]
+set title "Wind: last 96 hours"                                                                                               
+set format x "%d/%H"                                                                                                           
+unset key                                                                                                                           
+set term png small                                                                                          
+set output "/var/www/html/Ops/wind_96h.png"                                                                        
+plot "/usr/local/livedata/tmp/wind_96h.dat" using 1:2 wi li, 0.0 wi li 
+                                                         
+EOF                        

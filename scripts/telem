@@ -1,0 +1,91 @@
+#!/bin/csh
+
+#
+# Script to start DataSaver
+#
+
+set TEL_HOME=/usr/local/livedata
+set JAR_HOME=/usr/local/livedata/common
+
+# get class files.
+setenv CLASSPATH
+
+foreach file (${JAR_HOME}/ngat/*.jar)
+    setenv CLASSPATH ${CLASSPATH}:$file
+#    echo "Add $file"
+end
+
+setenv CLASSPATH /usr/local/livedata/newclass/new.jar:$CLASSPATH
+
+
+if ( ! ${?LD_LIBRARY_PATH} ) then
+   setenv LD_LIBRARY_PATH /lib:/usr/lib:/usr/X11R6/lib:/usr/local/lib/:.
+endif
+
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${JAR_HOME}/lib
+
+set JAVA=/usr/java/jdk1.6.0_16/bin/java
+
+set PID = /usr/local/livedata/telem.pid
+
+set PORT    = 6567
+set ROOTDIR = /home/eng/public_html
+
+onintr cleanup
+
+switch ($1)
+
+    case stop:
+
+        echo "Telemetry Data Receiver: stopping"
+
+        if (! -e $PID) then
+            echo "Cannot locate a PID file: $PID "
+            exit 1
+        endif
+        set AID = `cat $PID`
+
+        if ($AID == "") then
+            echo "$PID does not contain a valid PID for the TDR"
+            exit 2
+        endif
+
+        set BID = `ps -ef | grep $AID | awk '{if ($3 == '$AID') print $2}'`
+        echo TDR Watchdog process is $AID ..Killing with SIG_KILL
+        kill -9 $AID
+        echo TDR JVM Process is      $BID ..Killing with SIG_KILL
+        kill -9 $BID
+
+        rm -f $PID
+
+        breaksw
+
+    case start:
+
+	echo "Telemetry Data Receiver: starting"
+
+        echo $$ > $PID
+
+        cd $TEL_HOME
+
+        set EGD = "-Djava.security.egd=file:/dev/urandom"
+        set DEBUG
+
+	$JAVA ngat.rcsgui.stable.DataSave $PORT $ROOTDIR
+
+        set mexit = $status
+        echo "TDR Process exited with status $mexit "
+
+        rm -f $PID
+
+        exit 0
+
+        breaksw
+
+endsw
+
+cleanup:
+rm -f $PID
+
+
+

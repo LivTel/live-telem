@@ -1,0 +1,73 @@
+#!/bin/csh
+
+# 1 day
+tail -1440  /home/eng/public_html/disks_lt.dat  >&! /usr/local/livedata/tmp/disks_24h.dat
+
+#echo "DiskUsage24"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date/Time [UT]"
+set ylabel "Disk Usage"
+set yrange [0.0:100.0]
+set title "Disk usage: 24h"
+set format x "%H:%M"
+set key left top
+set term png small
+set output "/var/www/html/Ops/disks_usage_24h.png"
+plot "/usr/local/livedata/tmp/disks_24h.dat" using 1:2 wi li lc rgb "red" ti "OCC",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:4 wi li lc rgb "green" ti "NAS2",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:6 wi li lc rgb "blue" ti "Rise",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:8 wi li lc rgb "magenta" ti "Ringo3-1",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:10 wi li lc rgb "pink" ti "Ringo3-2",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:12 wi li lc rgb "cyan" ti "Autoguider1"
+EOF
+
+# 2 days
+tail -2880  /home/eng/public_html/disks_lt.dat  >&! /usr/local/livedata/tmp/disks_48h.dat
+
+#echo "DiskUsage48"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date/Time [UT]"
+set ylabel "Disk Usage"
+set yrange [0.0:100.0]
+set title "Disk usage: 48h"
+set format x "%H:%M"
+set key left top
+set term png small
+set output "/var/www/html/Ops/disks_usage_48h.png"
+plot "/usr/local/livedata/tmp/disks_48h.dat" using 1:2 wi li lc rgb "red" ti "OCC",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:4 wi li lc rgb "green" ti "NAS2",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:6 wi li lc rgb "blue" ti "Rise",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:8 wi li lc rgb "magenta" ti "Ringo3-1",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:10 wi li lc rgb "pink" ti "Ringo3-2",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:12 wi li lc rgb "cyan" ti "Autoguider1"
+EOF
+
+# 1 week
+tail -10800  /home/eng/public_html/disks_lt.dat  >&! /usr/local/livedata/tmp/disks_1wk.dat
+
+#echo "DiskUsage1wk"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date/Time [UT]"
+set ylabel "Disk Usage"
+set yrange [0.0:100.0]
+set title "Disk usage: 7 days"
+set format x "%d/%m/%y"
+set key left top
+set term png small
+set output "/var/www/html/Ops/disks_usage_1wk.png"
+plot "/usr/local/livedata/tmp/disks_1wk.dat" using 1:2 wi li lc rgb "red" ti "OCC",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:4 wi li lc rgb "green" ti "NAS2",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:6 wi li lc rgb "blue" ti "Rise",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:8 wi li lc rgb "magenta" ti "Ringo3-1",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:10 wi li lc rgb "pink" ti "Ringo3-2",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:12 wi li lc rgb "cyan" ti "Autoguider1"
+EOF

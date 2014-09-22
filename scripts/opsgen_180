@@ -1,0 +1,37 @@
+#!/bin/csh
+
+#
+# Script to generate ops summary
+#
+
+set TEL_HOME=/usr/local/livedata
+set JAR_HOME=/usr/local/livedata/common
+
+# get class files.
+#setenv CLASSPATH /usr/local/livedata/class
+setenv CLASSPATH
+
+foreach file (${JAR_HOME}/ngat/*.jar)
+    setenv CLASSPATH ${CLASSPATH}:$file
+#    echo "Add $file"
+end
+
+
+if ( ! ${?LD_LIBRARY_PATH} ) then
+   setenv LD_LIBRARY_PATH /lib:/usr/lib:/usr/X11R6/lib:/usr/local/lib/:.
+endif
+
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${JAR_HOME}/lib
+
+set JAVA=/usr/java/jdk1.6.0_16/bin/java
+
+
+cd $TEL_HOME
+
+set EGD = "-Djava.security.egd=file:/dev/urandom"
+ 
+set DAT = `date -u "+%Y-%m-%dT%H:%M:%S" -d "now -180 days"`
+
+$JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 180 --file /home/eng/public_html/oas_lt.dat --write --output /var/www/html/Ops/sixmonthly_ops.png >& /dev/null
+
+

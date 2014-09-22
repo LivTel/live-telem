@@ -1,0 +1,81 @@
+#!/bin/csh
+
+# -------------------------------------------
+# Generate seeing data plot for last N hours.
+# -------------------------------------------
+
+set nn = $1
+
+# Set this when deployed
+
+set BIN_DIR = /usr/local/livedata/bin
+set DATA_DIR = /home/eng/public_html
+set DEST_DIR = /var/www/html/Ops
+set TMP_DIR = /usr/local/livedata/tmp
+
+# set this when testing locally as required
+#set BIN_DIR = /home/eng/livestatus/bin
+#set DATA_DIR = /home/eng/livestatus/data
+#set DEST_DIR = /home/eng/livestatus/pubs
+#set TMP_DIR = /home/eng/livestatus/tmp
+
+set sfile = ${DATA_DIR}/seeing_lt.dat
+
+# this is N hours ago...
+set dn = `date -u +"%s" -d "now - $nn hours"`
+
+echo "DN $dn "
+
+#set dat = `date -u +"%Y%m%d%H%M"`
+
+set dat = `date -u +"%Y%m%d"`
+
+# First grab science frames
+cat $sfile | grep SCI | awk -v ST=$dn -f ${BIN_DIR}/timex.awk > ${TMP_DIR}/see_sci.dat
+
+# Grab standards
+cat $sfile | grep STD | awk -v ST=$dn -f ${BIN_DIR}/timex.awk > ${TMP_DIR}/see_std.dat
+
+# Predictions
+cat $sfile  | awk -v ST=$dn -f ${BIN_DIR}/timex.awk >  ${TMP_DIR}/pred.dat
+
+#set output "${DEST_DIR}/seeing_${dat}.eps"
+#set term postscript enhanced color
+
+# Count the number of items - if none in any set the gnuplot will fail !
+
+set nsci = `cat ${TMP_DIR}/see_sci.dat | wc -l`
+if ($nsci == 0) then
+    /bin/rm -f ${TMP_DIR}/see_sci.dat
+endif
+
+set nstd = `cat ${TMP_DIR}/see_std.dat | wc -l`
+if ($nstd == 0) then
+    /bin/rm -f ${TMP_DIR}/see_std.dat
+endif
+
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set yrange [0.0:3.0]
+set title "Seeing history. (Last $nn hours)"
+set xlabel "Time [UTC]"
+set ylabel "Seeing [arcsec]"
+set format x "%d/%H:%M"
+
+set object 1 rect from graph 0.0, graph 0.0 to graph 1, graph 0.33
+set object 1 rect fc rgb "green" fs solid 0.2 noborder
+set object 2 rect from graph 0.0, graph 0.33 to graph 1, graph 0.66
+set object 2 rect fc rgb "orange" fs solid 0.2  noborder
+set object 3 rect from graph 0.0, graph 0.66 to graph 1, graph 1.0
+set object 3 rect fc rgb "pink" fs solid 0.2  noborder
+
+set output "${DEST_DIR}/seeing_${nn}h.png"
+set term png small
+plot "${TMP_DIR}/see_sci.dat" using 1:2 lt 3 pt 11 ti "Raw sci",\
+     "${TMP_DIR}/see_sci.dat" using 1:3 lt 2 pt 7 ti "Corr sci",\
+     "${TMP_DIR}/see_std.dat" using 1:2 lt 4 pt 11 ti "Raw std",\
+     "${TMP_DIR}/see_std.dat" using 1:3 lt 7 pt 5 ti "Corr std",\
+     "${TMP_DIR}/pred.dat" using 1:4 wi li lt 1 ti "Predicted"
+EOF

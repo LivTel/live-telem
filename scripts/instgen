@@ -1,0 +1,40 @@
+#!/bin/csh 
+
+set TMP = /usr/local/livedata/tmp
+
+set INST = $1
+set INAME = $2
+set DAYS = $3
+set PN = $4
+set LIM = $5
+set TIT = $6
+
+set NM = `echo $DAYS | awk '{print $1*1440}'`
+set NH = `echo $DAYS | awk '{print $1*24}'`
+
+echo NM $NM
+
+# add low and high alert levels
+
+# 24*days hours of frodo data
+tail -$NM /home/eng/public_html/${INST}.dat   | awk  -v x=$PN '{print $1,$x}' >&! /usr/local/livedata/tmp/${INST}_nd.dat 
+
+tail /usr/local/livedata/tmp/${INST}_nd.dat     
+
+# now generate plot
+
+/usr/bin/gnuplot  <<EOF
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S" 
+set xlabel "Time [UT]" 
+set ylabel "Temperature" 
+#set yrange [120.0:130.0] 
+set title "Instrument $TIT ( $INAME ) $DAYS days"
+set format x "%d/%H:%M" 
+unset key
+set term png small
+set output "/var/www/html/Ops/${INST}_nd.png" 
+plot "/usr/local/livedata/tmp/${INST}_nd.dat" using 1:2 wi li lc rgb "blue" ti "${INAME}",\
+ ${LIM} wi li lc rgb "orange" ti "Normal"
+ 
+EOF

@@ -1,0 +1,29 @@
+#!/bin/csh
+
+# -------------------------
+# RCS Telemetry Requestor.
+# -------------------------
+
+source /opt/ngat/etc/cshrc
+
+cd /usr/local/livedata
+
+# Get classpath
+foreach file (ngat/*.jar)
+ setenv CLASSPATH ${CLASSPATH}:$file
+end
+
+set EGD   = "-Djava.security.egd=file:/dev/urandom"
+#set EGD
+
+#set DEBUG = "-Djavax.net.debug=all"
+set DEBUG
+
+set ASTRO = "-Dastrometry.impl=ngat.astrometry.TestCalculator"
+
+setenv JAVA /usr/java/jdk1.6.0_32/bin/java
+
+$JAVA -DRCSGUI -Xint $ASTRO $DEBUG $EGD ngat.rcsgui.stable.LiveDataFeedClient --host 192.168.1.30 --port 9110 --cat $1 --fhost 150.204.240.99 --fport 6567 --temp /usr/local/livedata/last_time >>& /dev/null
+
+
+

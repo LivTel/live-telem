@@ -1,0 +1,18 @@
+#!/bin/csh
+
+# -------------------------------------------
+# Environment for: Telemtry Data Receiver (TDR).
+# -------------------------------------------
+
+# unusually DeployHome == TelHome
+set TEL_HOME   = ${DEPLOY_HOME}
+set TEL_SCRIPT = ${TEL_HOME}/scripts
+set TEL_DOCS   = ${TEL_HOME}/docs
+set TEL_CLASS  = ${TEL_HOME}/class
+set TEL_CONFIG = ${TEL_HOME}/config
+
+# Add classes for TDR
+echo $CLASSPATH | grep ${TEL_CLASS} > /dev/null
+if ($status != 0) then
+    setenv CLASSPATH ${CLASSPATH}:${TEL_CLASS}
+endif

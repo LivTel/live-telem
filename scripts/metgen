@@ -1,0 +1,282 @@
+#!/bin/csh
+
+#echo "Starting..."
+
+tail -144  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$11}' >&! /usr/local/livedata/tmp/humidity_12h.dat
+tail -144  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$9}' >&! /usr/local/livedata/tmp/temperature_12h.dat
+tail -144  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$7}' >&! /usr/local/livedata/tmp/wind_12h.dat
+tail -144  /home/eng/public_html/cloud_lt.dat  | awk '{print $1,$3}' >&! /usr/local/livedata/tmp/cloud_12h.dat
+tail -144 /home/eng/public_html/agtemp_lt.dat | grep -v "1970" | awk '{print $1,$2}' >&! /usr/local/livedata/tmp/agtemp_12h.dat 
+
+tail -288 /home/eng/public_html/agtemp_lt.dat | grep -v "1970" |awk '{print $1,$2}' >&! /usr/local/livedata/tmp/agtemp_24h.dat
+tail -288 /home/eng/public_html/cloud_lt.dat  | awk '{print $1,$3}' >&! /usr/local/livedata/tmp/cloud_24h.dat
+tail -288  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$9}' >&! /usr/local/livedata/tmp/temperature_24h.dat  
+#tail -720  /home/eng/public_html/sky_lt.dat    | awk '{print $1,$3}' >&! /usr/local/livedata/tmp/seeing_12h.dat
+tail -144  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$13}' >&! /usr/local/livedata/tmp/solar_12h.dat
+#tail -4320  /home/eng/public_html/sky_lt.dat    | awk '{print $1,$3}' >&! /usr/local/livedata/tmp/seeing_72h.dat
+
+tail -2160  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$11}' >&! /usr/local/livedata/tmp/humidity_72h.dat
+tail -2160  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$9}' >&! /usr/local/livedata/tmp/temperature_72h.dat
+tail -2160  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$7}' >&! /usr/local/livedata/tmp/wind_72h.dat
+
+tail -288 /home/eng/public_html/frodo.dat   | awk  '{print $1,$8,$9, $10}' >&! /usr/local/livedata/tmp/frodo_env_24h.dat 
+tail -2016 /home/eng/public_html/frodo.dat   | awk  '{print $1,$8,$9, $10}' >&! /usr/local/livedata/tmp/frodo_env_wk.dat
+tail -4212 /home/eng/public_html/frodo.dat   | awk  '{print $1,$8,$9, $10}' >&! /usr/local/livedata/tmp/frodo_env_2wk.dat
+tail -288  /home/eng/public_html/disks_lt.dat  >&! /usr/local/livedata/tmp/disks_24h.dat
+
+#echo "Done initial extractions"
+
+#echo "Agtemp"
+/usr/bin/gnuplot  <<EOF
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Time [UT]" 
+set ylabel "Temperature [C]" 
+set yrange [-60.0: 0.0]
+set title "Autoguider Temperature"
+set format x "%H"
+set key top right
+set term png small
+set output "/var/www/html/Ops/agtemp_12h.png"
+plot "/usr/local/livedata/tmp/agtemp_12h.dat" using 1:2 wi li lc rgb "green" ti "Ag Temp",\
+ -30 wi li lc rgb "red" ti "hot limit",\
+ -35 wi li lc rgb "orange" ti "hot warn",\
+ -45 wi li lc rgb "cyan" ti "cold warn",\
+ -50 wi li lc rgb "blue" ti "cold limit"
+
+set term png small
+set output "/var/www/html/Ops/agtemp_24h.png"
+plot "/usr/local/livedata/tmp/agtemp_24h.dat" using 1:2 wi li lc rgb "green" ti "Ag Temp",\
+ -30 wi li lc rgb "red" ti "hot limit",\
+ -35 wi li lc rgb "orange" ti "hot warn",\
+ -45 wi li lc rgb "cyan" ti "cold warn",\
+ -50 wi li lc rgb "blue" ti "cold limit" 
+
+EOF
+
+#echo "Hum12"  
+/usr/bin/gnuplot  <<EOF
+ 
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Time [UT]"
+set ylabel "Humidity"
+set yrange [0:1.1]
+set title "Humidity: last 12 hours"
+set format x "%H"
+unset key
+set term png small
+set output "/var/www/html/Ops/humidity_12h.png"
+plot "/usr/local/livedata/tmp/humidity_12h.dat" using 1:2 wi li, 0.8 wi li, 0.7 wi li
+
+set title "Humidity: last 72 hours"
+set format x "%d/%Hh"
+set term png small
+set output "/var/www/html/Ops/humidity_72h.png"
+plot "/usr/local/livedata/tmp/humidity_72h.dat" using 1:2 wi li, 0.8 wi li, 0.7 wi li
+
+EOF
+
+#echo "Temp12"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Time [UT]"
+set ylabel "Temperature"
+set yrange [-10.0:30.0]
+set title "Temperature: last 12 hours"
+set format x "%H"
+unset key
+set term png small
+set output "/var/www/html/Ops/temperature_12h.png"
+plot "/usr/local/livedata/tmp/temperature_12h.dat" using 1:2 wi li, 0.0 wi li
+
+set title "Temperature: last 24 hours"
+set format x "%d/%Hh"
+set term png small
+set output "/var/www/html/Ops/temperature_24h.png"
+plot "/usr/local/livedata/tmp/temperature_24h.dat" using 1:2 wi li, 0.0 wi li
+
+set title "Temperature: last 72 hours"
+set format x "%d/%Hh"
+set term png small
+set output "/var/www/html/Ops/temperature_72h.png"
+plot "/usr/local/livedata/tmp/temperature_72h.dat" using 1:2 wi li, 0.0 wi li
+
+EOF
+
+
+#echo "Wind12"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"                                                                                                              
+set xlabel "Time [UT]"
+set ylabel "Wind"
+set yrange [0.0:40.0]
+set title "Wind: last 12 hours"
+set format x "%H"
+unset key
+set term png small
+set output "/var/www/html/Ops/wind_12h.png"
+plot "/usr/local/livedata/tmp/wind_12h.dat" using 1:2 wi li, 0.0 wi li
+
+set title "Wind: last 72 hours"
+set format x "%d/%Hh"      
+set term png small
+set output "/var/www/html/Ops/wind_72h.png"
+plot "/usr/local/livedata/tmp/wind_72h.dat" using 1:2 wi li, 0.0 wi li
+
+EOF
+
+#echo "Cloud12"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Time [UT]"
+set ylabel "Cloud"
+set yrange [-120.0:10.0]
+set title "Cloud: last 12 hours"
+set format x "%H"
+unset key
+set term png small
+set output "/var/www/html/Ops/cloud_12h.png"
+plot "/usr/local/livedata/tmp/cloud_12h.dat" using 1:2 wi li, -18 wi li, -21 wi li
+
+EOF
+
+#echo "Cloud24"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Time [UT]"
+set ylabel "Cloud"
+set yrange [-120.0:10.0]
+set title "Cloud: last 24 hours"
+set format x "%H"
+unset key
+set term png small
+set output "/var/www/html/Ops/cloud_24h.png"
+plot "/usr/local/livedata/tmp/cloud_24h.dat" using 1:2 wi li, -18 wi li, -21 wi li
+
+EOF
+
+
+#echo "Solar12"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Time [UT]"
+set ylabel "Sunshine"
+set yrange [0.0:1100.0]
+set title "Sunshine: last 12 hours"
+set format x "%H"
+unset key                                                                                                                       
+set term png small                                                                                             
+set output "/var/www/html/Ops/solar_12h.png"                                                                    
+plot "/usr/local/livedata/tmp/solar_12h.dat" using 1:2 wi li          
+
+EOF
+
+#echo "FrodoEnv24"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Time [UT]"
+set ylabel "Frodo Environment"
+set yrange [0.0:30.0]
+set title "Frodo Environment Temperature: last 24 hours"
+set format x "%H"
+set key right bottom
+set term png small
+set output "/var/www/html/Ops/frodo_env_24h.png"
+plot "/usr/local/livedata/tmp/frodo_env_24h.dat" using 1:2 wi li lc rgb "red" ti "Red",\
+ "/usr/local/livedata/tmp/frodo_env_24h.dat" using 1:3 wi li lc rgb "blue" ti "Blue",\
+  "/usr/local/livedata/tmp/frodo_env_24h.dat" using 1:4 wi li lc rgb "orange" ti "Ambient"
+
+EOF
+
+#echo "FrodoEnvWk"  
+/usr/bin/gnuplot  <<EOF
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S" 
+set xlabel "Date" 
+set ylabel "Frodo Environment" 
+set yrange [0.0:30.0] 
+set title "Frodo Environment Temperature: last week" 
+set format x "%d" 
+set key right bottom 
+set term png small
+set output "/var/www/html/Ops/frodo_env_wk.png" 
+plot "/usr/local/livedata/tmp/frodo_env_wk.dat" using 1:2 wi li lc rgb "red" ti "Red",\
+ "/usr/local/livedata/tmp/frodo_env_wk.dat" using 1:3 wi li lc rgb "blue" ti "Blue",\
+  "/usr/local/livedata/tmp/frodo_env_wk.dat" using 1:4 wi li lc rgb "orange" ti "Ambient" 
+EOF
+
+#echo "FrodoEnv2Wk"
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date"
+set ylabel "Frodo Environment"
+set yrange [0.0:30.0]
+set title "Frodo Environment Temperature: last 2 weeks"
+set format x "%d"
+set key right bottom
+set term png small
+set output "/var/www/html/Ops/frodo_env_2wk.png"
+plot "/usr/local/livedata/tmp/frodo_env_2wk.dat" using 1:2 wi li lc rgb "red" ti "Red",\
+ "/usr/local/livedata/tmp/frodo_env_2wk.dat" using 1:3 wi li lc rgb "blue" ti "Blue",\
+  "/usr/local/livedata/tmp/frodo_env_2wk.dat" using 1:4 wi li lc rgb "orange" ti "Ambient" 
+EOF
+
+#echo "DiskUsage24"  
+/usr/bin/gnuplot  <<EOF
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date/Time [UT]"
+set ylabel "Disk Usage"
+set yrange [0.0:100.0]
+set title "Disk usage: 24h"
+set format x "%H:%M"
+set key left top
+set term png small
+set output "/var/www/html/Ops/disks_usage_24h.png"
+plot "/usr/local/livedata/tmp/disks_24h.dat" using 1:2 wi li lc rgb "red" ti "OCC",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:4 wi li lc rgb "green" ti "NAS2",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:6 wi li lc rgb "blue" ti "Rise",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:8 wi li lc rgb "magenta" ti "Ringo3-1",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:10 wi li lc rgb "pink" ti "Ringo3-2",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:12 wi li lc rgb "cyan" ti "Autoguider1"
+
+EOF
+
+#echo "DiskFree24"  
+/usr/bin/gnuplot  <<EOF
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date/Time [UT]"
+set ylabel "Disk Free Space [Gb]"
+set yrange [-10.0: 350.0]
+set title "Disk Free Space: 24h"
+set format x "%H:%M"
+set key left top
+set term png small
+set output "/var/www/html/Ops/disks_free_24h.png"
+plot "/usr/local/livedata/tmp/disks_24h.dat" using 1:3 wi li lc rgb "red" ti "OCC",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:5 wi li lc rgb "green" ti "NAS2",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:7 wi li lc rgb "blue" ti "Rise",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:9 wi li lc rgb "magenta" ti "Ringo3-1",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:11 wi li lc rgb "pink" ti "Ringo3-2",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:13 wi li lc rgb "cyan" ti "Autoguider1"              
+
+
+
+EOF
+

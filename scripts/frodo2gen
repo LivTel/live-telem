@@ -1,0 +1,38 @@
+#!/bin/csh 
+
+set TMP = /usr/local/livedata/tmp
+
+# 24 hours of frodo data
+tail -288 /home/eng/public_html/frodo.dat   | awk  '{print $1,$8,$9}' >&! /usr/local/livedata/tmp/frodo_env_24h.dat 
+
+# produce the focus values
+
+cat ${TMP}/frodo_env_24h.dat | awk '{print $1, (5461.1 - $2)/31.462}' > /usr/local/livedata/tmp/frodo_red_hi_focus.dat
+cat ${TMP}/frodo_env_24h.dat | awk '{print $1, (5232.4 - $2)/30.168}' > /usr/local/livedata/tmp/frodo_red_lo_focus.dat 
+cat ${TMP}/frodo_env_24h.dat | awk '{print $1, (3166.0 - $2)/24.989}' > /usr/local/livedata/tmp/frodo_blue_hi_focus.dat
+cat ${TMP}/frodo_env_24h.dat | awk '{print $1, (2881.0 - $2)/22.746}' > /usr/local/livedata/tmp/frodo_blue_lo_focus.dat  
+
+# now generate some plots
+
+/usr/bin/gnuplot  <<EOF
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S" 
+set xlabel "Time [UT]" 
+set ylabel "Frodo Focus (Red)" 
+#set yrange [160.0:180.0] 
+set title "Frodo Focus (Red)"
+set format x "%H:%M" 
+set key right bottom 
+set term png small
+set output "/var/www/html/Ops/frodo_focus_all.png" 
+plot "/usr/local/livedata/tmp/frodo_red_lo_focus.dat" using 1:2 wi li lc rgb "cyan" ti "Low",\
+ "/usr/local/livedata/tmp/frodo_red_hi_focus.dat" using 1:2 wi li lc rgb "magenta" ti "High",\
+ 172.62 wi li lc rgb "cyan" ti "low (def)",\
+ 172.79 wi li lc rgb "magenta" ti "High (def)",\
+"/usr/local/livedata/tmp/frodo_blue_lo_focus.dat" using 1:2 axes x1y2 wi li lc rgb "blue" ti "Low",\
+ "/usr/local/livedata/tmp/frodo_blue_hi_focus.dat" using 1:2 axes x1y2 wi li lc rgb "green" ti "High",\
+  125.54 wi li lc rgb "cyan" ti "Low (def)",\
+  125.67 wi li lc rgb "magenta" ti "High (def)" 
+
+
+EOF

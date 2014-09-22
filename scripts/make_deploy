@@ -1,0 +1,54 @@
+#!/bin/csh
+
+# ===========================================
+# Make deployment for Live Telemetry Receiver
+# ===========================================
+
+# Run from /home/dev/telem_live/
+
+set HERE = `pwd`
+set HMD = /home/dev/src/telem_live
+
+if ($HERE != $HMD) then
+    echo "Not in home directory $HMD "
+    exit 1
+endif
+
+mkdir deploy
+
+/bin/cp -fvR bin deploy/
+/bin/cp -fvR tmp deploy/
+
+set COMMON = deploy/common
+
+mkdir $COMMON
+set JLIB = /home/dev/bin/javalib
+set JLIB3P = /home/dev/bin/javalib_third_party
+
+/bin/cp -fv $JLIB/ngat_message_base.jar $COMMON
+/bin/cp -fv $JLIB/ngat_message_gui_rcs.jar $COMMON
+/bin/cp -fv $JLIB/ngat_message_rcs_tcs.jar $COMMON
+/bin/cp -fv $JLIB/ngat_utl.jar  $COMMON
+/bin/cp -fv $JLIB/ngat_net.jar $COMMON
+/bin/cp -fv $JLIB/ngat_util_logging.jar $COMMON
+/bin/cp -fv $JLIB/ngat_net_telemetry.jar $COMMON
+/bin/cp -fv $JLIB/ngat_telemetry.jar $COMMON
+/bin/cp -fv $JLIB/ngat_phase2.jar $COMMON
+/bin/cp -fv $JLIB/ngat_ems.jar $COMMON
+/bin/cp -fv $JLIB/rcs_class.jar $COMMON
+/bin/cp -fv $JLIB/ngat_phase2_nonpersist.jar $COMMON
+/bin/cp -fv $JLIB/ngat_astrometry.jar $COMMON
+/bin/cp -fv $JLIB3P/jcommon-1.0.18.jar $COMMON
+/bin/cp -fv $JLIB3P/jcommon-1.0.18-junit.jar $COMMON
+/bin/cp -fv $JLIB3P/jcommon-xml-1.0.18.jar $COMMON
+/bin/cp -fv $JLIB3P/jfreechart-1.0.14.jar $COMMON
+
+# Tar up to user_home
+
+set UHOM = ~
+set DAT = `date -u "+%Y%m%d%H%M"`
+set TAR = $UHOM/telem_live_$DAT.tar
+echo "Tarring deployment to: $TAR "
+tar cvf $TAR *
+
+
