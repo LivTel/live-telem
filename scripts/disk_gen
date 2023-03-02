@@ -1,0 +1,130 @@
+#!/bin/tcsh
+
+set OPTIPNG = /usr/bin/optipng
+
+#########################
+
+# 1 day
+tail -144  /home/eng/public_html/disks_lt.dat  >&! /usr/local/livedata/tmp/disks_24h.dat
+
+#echo "DiskUsage24"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date/Time [UT]"
+set ylabel "Disk Usage"
+set yrange [0.0:100.0]
+set title "Disk usage: 24h"
+set format x "%H:%M"
+set key left top
+set term png small
+set output "/var/www/html/Ops/disks_usage_24h.png"
+plot "/usr/local/livedata/tmp/disks_24h.dat" using 1:2 wi li lc rgb "red" ti "OCC",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:4 wi li lc rgb "green" ti "rackstation",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:6 wi li lc rgb "blue" ti "Rise",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:12 wi li lc rgb "cyan" ti "Autoguider1",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:8 wi li lc rgb "magenta" ti "Moptop3",\
+     "/usr/local/livedata/tmp/disks_24h.dat" using 1:10 wi li lc rgb "pink" ti "Moptop4"
+EOF
+# Following two lines removed from the above plot. RJS 2020-06-12
+#     "/usr/local/livedata/tmp/disks_24h.dat" using 1:8 wi li lc rgb "magenta" ti "Ringo3-1",\
+#     "/usr/local/livedata/tmp/disks_24h.dat" using 1:10 wi li lc rgb "pink" ti "Ringo3-2",\
+
+# 2 days
+tail -288  /home/eng/public_html/disks_lt.dat  >&! /usr/local/livedata/tmp/disks_48h.dat
+
+#echo "DiskUsage48"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date/Time [UT]"
+set ylabel "Disk Usage"
+set yrange [0.0:100.0]
+set title "Disk usage: 48h"
+set format x "%m/%d %Hh"
+set key left top
+set term png small
+set output "/var/www/html/Ops/disks_usage_48h.png"
+plot "/usr/local/livedata/tmp/disks_48h.dat" using 1:2 wi li lc rgb "red" ti "OCC",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:4 wi li lc rgb "green" ti "rackstation",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:6 wi li lc rgb "blue" ti "Rise",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:12 wi li lc rgb "cyan" ti "Autoguider1",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:8 wi li lc rgb "magenta" ti "Moptop3",\
+     "/usr/local/livedata/tmp/disks_48h.dat" using 1:10 wi li lc rgb "pink" ti "Moptop4"
+EOF
+# Following two lines removed from the above plot. RJS 2020-06-12
+#"/usr/local/livedata/tmp/disks_48h.dat" using 1:8 wi li lc rgb "magenta" ti "Ringo3-1",\
+#"/usr/local/livedata/tmp/disks_48h.dat" using 1:10 wi li lc rgb "pink" ti "Ringo3-2",\
+
+# 1 week
+tail -1080  /home/eng/public_html/disks_lt.dat  >&! /usr/local/livedata/tmp/disks_1wk.dat
+
+#echo "DiskUsage1wk"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date/Time [UT]"
+set ylabel "Disk Usage"
+set yrange [0.0:100.0]
+set title "Disk usage: 7 days"
+set format x "%d/%m/%y"
+set key left top
+set term png small
+set output "/var/www/html/Ops/disks_usage_1wk.png"
+plot "/usr/local/livedata/tmp/disks_1wk.dat" using 1:2 wi li lc rgb "red" ti "OCC",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:4 wi li lc rgb "green" ti "rackstation",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:6 wi li lc rgb "blue" ti "Rise",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:12 wi li lc rgb "cyan" ti "Autoguider1",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:8 wi li lc rgb "magenta" ti "Moptop3",\
+     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:10 wi li lc rgb "pink" ti "Moptop4"
+EOF
+# Following two lines removed from the above plot. RJS 2020-06-12
+#     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:8 wi li lc rgb "magenta" ti "Ringo3-1",\
+#     "/usr/local/livedata/tmp/disks_1wk.dat" using 1:10 wi li lc rgb "pink" ti "Ringo3-2",\
+
+
+# 6 months
+tail -26280  /home/eng/public_html/disks_lt.dat  >&! /usr/local/livedata/tmp/disks_6month.dat
+
+#echo "DiskUsage6month"  
+/usr/bin/gnuplot  <<EOF
+
+set xdata time
+set timefmt "%Y-%m-%d%H:%M:%S"
+set xlabel "Date/Time [UT]"
+set ylabel "Disk Usage"
+set yrange [0.0:100.0]
+set title "Disk usage: 6 months"
+set format x "%d/%m/%y"
+set key left top
+set term png small
+set output "/var/www/html/Ops/disks_usage_6month.png"
+plot "/usr/local/livedata/tmp/disks_6month.dat" using 1:2 wi li lc rgb "red" ti "OCC",\
+     "/usr/local/livedata/tmp/disks_6month.dat" using 1:4 wi li lc rgb "green" ti "rackstation",\
+     "/usr/local/livedata/tmp/disks_6month.dat" using 1:6 wi li lc rgb "blue" ti "Rise",\
+     "/usr/local/livedata/tmp/disks_6month.dat" using 1:12 wi li lc rgb "cyan" ti "Autoguider1",\
+     "/usr/local/livedata/tmp/disks_6month.dat" using 1:8 wi li lc rgb "magenta" ti "Moptop3",\
+     "/usr/local/livedata/tmp/disks_6month.dat" using 1:10 wi li lc rgb "pink" ti "Moptop4"
+EOF
+# Following two lines removed from the above plot. RJS 2020-06-12
+#     "/usr/local/livedata/tmp/disks_6month.dat" using 1:8 wi li lc rgb "magenta" ti "Ringo3-1",\
+#     "/usr/local/livedata/tmp/disks_6month.dat" using 1:10 wi li lc rgb "pink" ti "Ringo3-2",\
+
+
+################################
+
+
+# ------------#
+# Run OPTIPNG #
+# ------------#
+if ( -e $OPTIPNG ) then
+  foreach pngname (/var/www/html/Ops/disks_usage_24h.png /var/www/html/Ops/disks_usage_48h.png /var/www/html/Ops/disks_usage_1wk.png /var/www/html/Ops/disks_usage_6month.png) 
+    # Defaults on optipng are generally fine. Increasing the -o level generally gains 2-5% compression
+    # at the expenseof doubling (or more) the CPU time.
+    if ( -e $pngname ) $OPTIPNG -quiet $pngname
+  end
+endif
+

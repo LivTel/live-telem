@@ -35,5 +35,5 @@ set DAT = `date -u "+%Y-%m-%dT%H:%M:%S" -d "now -90 days"`
 $JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 90 --file /home/eng/public_html/oas_lt.dat --write --output /var/www/html/Ops/trimonthly_ops.png 
 #>& /dev/null
 
-$JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 90 --file /home/eng/public_html/oas_lt.dat --write --colors /home/eng/tmp/alt.properties --output /var/www/html/Ops/trimonthly_ops2.png
+#$JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 90 --file /home/eng/public_html/oas_lt.dat --write --colors /home/eng/tmp/alt.properties --output /var/www/html/Ops/trimonthly_ops2.png
 # >& /dev/null  

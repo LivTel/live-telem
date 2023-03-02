@@ -23,7 +23,8 @@ endif
 
 setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${JAR_HOME}/lib
 
-set JAVA=/usr/java/jdk1.6.0_16/bin/java
+#set JAVA=/usr/java/jdk1.6.0_16/bin/java
+set JAVA=/usr/bin/java
 
 
 cd $TEL_HOME

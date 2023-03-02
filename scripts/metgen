@@ -2,7 +2,10 @@
 
 #echo "Starting..."
 
+#echo "  humidity data"
 tail -144  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$11}' >&! /usr/local/livedata/tmp/humidity_12h.dat
+
+#echo "  temperature data"
 tail -144  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$9}' >&! /usr/local/livedata/tmp/temperature_12h.dat
 tail -144  /home/eng/public_html/meteo_lt.dat  | awk '{print $1,$7}' >&! /usr/local/livedata/tmp/wind_12h.dat
 tail -144  /home/eng/public_html/cloud_lt.dat  | awk '{print $1,$3}' >&! /usr/local/livedata/tmp/cloud_12h.dat
@@ -24,6 +27,37 @@ tail -2016 /home/eng/public_html/frodo.dat   | awk  '{print $1,$8,$9, $10}' >&! 
 tail -4212 /home/eng/public_html/frodo.dat   | awk  '{print $1,$8,$9, $10}' >&! /usr/local/livedata/tmp/frodo_env_2wk.dat
 tail -288  /home/eng/public_html/disks_lt.dat  >&! /usr/local/livedata/tmp/disks_24h.dat
 
+
+# Parse the meteo_lt.dat into a format that is easier to handle in D3 and javascript
+# We could parse the meteo_lt.dat as it is, but a littel reformatting makes it all so much painles
+# * We add column names which allows D3 to address data by name instead of counting columns
+# * Convert from space spearated to tab separated
+# * Remove thge UTC from the timestamp
+# * Insert a T character to make the timestamp ISO compliant
+#
+# One month at 2min cadence = 21600 points
+# Keep all the last 5040 points. That is one week at a point per 2min.
+# Keep one-in-five (data point every ten minutes) for the past month
+set MONTH_MET = /var/www/html/Ops/month_meteo_lt.dat
+printf "timestamp\tstate1\tstate2\tval1\tval2\tval3\twindspeed\twinddirection\ttemperature\tval7\thumidty\tpressure\tlight\n" >! $MONTH_MET
+tail -21600 /home/eng/public_html/meteo_lt.dat | awk '(NR>(21600-5040) || (NR<(21600-5040) && (NR%5==0)) )' |tr " " "\t" | sed 's/./&T/10' | sed "s/UTC//" >> $MONTH_MET
+# Just the last hour of data
+set HOUR_MET = /var/www/html/Ops/hour_meteo_lt.dat
+printf "timestamp\tstate1\tstate2\tval1\tval2\tval3\twindspeed\twinddirection\ttemperature\tval7\thumidty\tpressure\tlight\n" >! $HOUR_MET
+tail -30 /home/eng/public_html/meteo_lt.dat | tr " " "\t" | sed 's/./&T/10' | sed "s/UTC//" >> $HOUR_MET
+#
+# Parsing the full file takes q long time. We probably want a smarter way to so this than redoing it in cron every 15min
+# What we call "full" is only the past year or so. We cannot send everything back to 2007!
+#set FULL_MET = /var/www/html/Ops/full_meteo_lt.dat
+#printf "timestamp\tstate1\tstate2\tval1\tval2\tval3\twindspeed\twinddirection\ttemperature\tval7\thumidty\tpressure\tlight\n" >! $FULL_MET
+#set thisyear = `date +%Y`
+#@ lastyear = $thisyear - 1
+#egrep "^$thisyear|^$lastyear" /home/eng/public_html/meteo_lt.dat | tr " " "\t" | sed 's/./&T/10' | sed "s/UTC//" >> $FULL_MET 
+#set SPARSE_MET = /var/www/html/Ops/sparse_meteo_lt.dat
+#set filelen = `cat $FULL_MET | wc -l`
+#awk '( NR==0 || (NR<'$filelen'-10000 && NR%1000==0) || (NR>'$filelen'-10000 && NR%50==0) )' $FULL_MET | tr " " "\t" | sed 's/./&T/10' | sed "s/UTC//" >> $SPARSE_MET
+
+
 #echo "Done initial extractions"
 
 #echo "Agtemp"
@@ -32,7 +66,7 @@ set xdata time
 set timefmt "%Y-%m-%d%H:%M:%S"
 set xlabel "Time [UT]" 
 set ylabel "Temperature [C]" 
-set yrange [-60.0: 0.0]
+set yrange [-60.0:*]  # Changed from [-60.0:0.0] JMM 15/7/20
 set title "Autoguider Temperature"
 set format x "%H"
 set key top right
@@ -84,7 +118,7 @@ set xdata time
 set timefmt "%Y-%m-%d%H:%M:%S"
 set xlabel "Time [UT]"
 set ylabel "Temperature"
-set yrange [-10.0:30.0]
+#set yrange [-10.0:30.0]
 set title "Temperature: last 12 hours"
 set format x "%H"
 unset key
@@ -98,12 +132,15 @@ set term png small
 set output "/var/www/html/Ops/temperature_24h.png"
 plot "/usr/local/livedata/tmp/temperature_24h.dat" using 1:2 wi li, 0.0 wi li
 
-set title "Temperature: last 72 hours"
-set format x "%d/%Hh"
+#set title "Temperature: last 72 hours"
+unset title
+set format x "%d\n%Hh"
+set yrange[*:*] # edited from [*:20] -- JMM 14/7/20
 set term png small
+set font "Verdana, 12"
 set output "/var/www/html/Ops/temperature_72h.png"
 plot "/usr/local/livedata/tmp/temperature_72h.dat" using 1:2 wi li, 0.0 wi li
-
+unset font
 EOF
 
 
@@ -225,7 +262,7 @@ set xdata time
 set timefmt "%Y-%m-%d%H:%M:%S"
 set xlabel "Date"
 set ylabel "Frodo Environment"
-set yrange [0.0:30.0]
+set yrange [0.0:*]  # Changed from [0.0:30.0] JMM 15/7/20
 set title "Frodo Environment Temperature: last 2 weeks"
 set format x "%d"
 set key right bottom

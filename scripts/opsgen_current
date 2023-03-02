@@ -1,11 +1,19 @@
 #!/bin/csh
 
+set DEBUG = 0
+
+
 #
 # Script to generate ops summary
 #
 
+
 set TEL_HOME=/usr/local/livedata
 set JAR_HOME=/usr/local/livedata/common
+
+
+if ($DEBUG) echo "Setting environments"
+
 
 # get class files.
 #setenv CLASSPATH /usr/local/livedata/class
@@ -13,7 +21,7 @@ setenv CLASSPATH
 
 foreach file (${JAR_HOME}/ngat/*.jar)
     setenv CLASSPATH ${CLASSPATH}:$file
-#    echo "Add $file"
+    if ($DEBUG) echo "Add $file"
 end
 
 setenv CLASSPATH /usr/local/livedata/newclass/new.jar:$CLASSPATH
@@ -25,7 +33,8 @@ endif
 
 setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${JAR_HOME}/lib
 
-set JAVA=/usr/java/jdk1.6.0_16/bin/java
+# set JAVA=/usr/java/jdk1.6.0_16/bin/java
+set JAVA=/usr/bin/java
 
 
 cd $TEL_HOME
@@ -33,20 +42,32 @@ cd $TEL_HOME
 set EGD = "-Djava.security.egd=file:/dev/urandom"
  
 set HH = `date -u "+%H"` 
-#echo "The hour is $HH "
+if ($DEBUG) echo "The hour is $HH "
 
 if ($HH >= 12) then
-    #echo "Evening going for lunchtime today..."
+    if ($DEBUG) echo "Evening going for lunchtime today..."
     set DAT = `date -u "+%Y-%m-%dT%H:%M:%S" -d "1200"`
-    #echo "Set date to $DAT "
+    if ($DEBUG) echo "Set date to $DAT "
 else
-    #echo "Morning so use yesterday lunchtime..."
+    if ($DEBUG) echo "Morning so use yesterday lunchtime..."
     set DAT = `date -u "+%Y-%m-%dT%H:%M:%S" -d "yesterday 1200"`     
-    #echo "Set date to $DAT "        
+    if ($DEBUG) echo "Set date to $DAT "        
 endif
 
-$JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 1 --file /home/eng/public_html/oas_lt.dat --write --output /var/www/html/Ops/current_ops.png >& /dev/null
 
-$JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 1 --file /home/eng/public_html/oas_lt.dat --colors /home/eng/tmp/alt.properties --write --output /var/www/html/Ops/current_ops2.png >& /dev/null  
+
+if ($DEBUG) echo "Generate  /var/www/html/Ops/current_ops.png"
+if ($DEBUG) then
+  $JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 1 --file /home/eng/public_html/oas_lt.dat --write --output /var/www/html/Ops/current_ops.png 
+else
+  $JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 1 --file /home/eng/public_html/oas_lt.dat --write --output /var/www/html/Ops/current_ops.png >& /dev/null
+endif
+
+if ($DEBUG) echo "Generate  /var/www/html/Ops/current_ops2.png"
+if ($DEBUG) then
+  $JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 1 --file /home/eng/public_html/oas_lt.dat --colors /home/eng/tmp/alt.properties --write --output /var/www/html/Ops/current_ops2.png 
+else
+  $JAVA ngat.rcsgui.test.OperationsTimeSlicer --start $DAT --nd 1 --file /home/eng/public_html/oas_lt.dat --colors /home/eng/tmp/alt.properties --write --output /var/www/html/Ops/current_ops2.png >& /dev/null  
+endif
 
 
