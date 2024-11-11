@@ -1,0 +1,23 @@
+# A systemd service file to replace telem_init that was previously in init.d
+#
+# Put in
+#   /etc/systemd/system/
+# and  
+#	  systectl enable telem
+#
+[Unit]
+Description=Live telemetry feed
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+#ExecStart=/etc/init.d/telem_start
+ExecStart=/usr/local/livedata/bin/telem start
+Type=simple
+PIDFile=/usr/local/livedata/telem.pid
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=telem
+
+[Install]
+WantedBy=multi-user.target
